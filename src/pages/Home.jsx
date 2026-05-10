@@ -141,9 +141,7 @@ export default function Home() {
       <section id="products" className="section-padding bg-cream">
         <div className="container-max">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <span className="badge-natural mb-4 inline-block">Our Products</span>
-            <h2 className="section-title mt-3">Choose Your Size</h2>
-            <p className="mt-4 text-gray-600 max-w-xl mx-auto">Premium Ayurvedic hair oil available in three sizes to suit your needs</p>
+            {/* Heading removed per user request */}
           </motion.div>
 
           {/* View Toggle */}

@@ -89,11 +89,17 @@ export default function Admin() {
         images: finalImages
       }
 
+      let dbError;
       if (editingProduct) {
-        await supabase.from('products').update(payload).eq('id', editingProduct.id)
+        const { error } = await supabase.from('products').update(payload).eq('id', editingProduct.id)
+        dbError = error
       } else {
-        await supabase.from('products').insert([payload])
+        const { error } = await supabase.from('products').insert([payload])
+        dbError = error
       }
+      
+      if (dbError) throw dbError
+
       setEditingProduct(null)
       setProductFiles([])
       fetchData()
@@ -135,14 +141,24 @@ export default function Admin() {
 
   const deleteProduct = async (id) => {
     if (confirm('Are you sure?')) {
-      await supabase.from('products').delete().eq('id', id)
-      fetchData()
+      const { error } = await supabase.from('products').delete().eq('id', id)
+      if (error) {
+        console.error(error)
+        alert('Error deleting product: ' + error.message)
+      } else {
+        fetchData()
+      }
     }
   }
 
   const updateOrderStatus = async (id, status) => {
-    await supabase.from('orders').update({ status }).eq('id', id)
-    fetchData()
+    const { error } = await supabase.from('orders').update({ status }).eq('id', id)
+    if (error) {
+      console.error(error)
+      alert('Error updating order: ' + error.message)
+    } else {
+      fetchData()
+    }
   }
 
   if (!isAuthenticated) {

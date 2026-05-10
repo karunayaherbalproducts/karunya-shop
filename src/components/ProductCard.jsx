@@ -72,26 +72,13 @@ export default function ProductCard({ product, view = 'grid' }) {
           </div>
           <div className="mt-3 flex items-center justify-between flex-wrap gap-3">
             <PriceTag product={product} size="md" />
-            <div className="flex gap-2">
+            <div className="w-full sm:w-auto mt-2 sm:mt-0">
               <Link
                 to={`/product/${product.id}`}
-                className="btn-outline text-sm py-2 px-4"
+                className="btn-primary block w-full sm:w-auto text-center text-sm py-2 px-8"
               >
-                View
+                Buy
               </Link>
-              <button
-                onClick={handleAddToCart}
-                disabled={product.stock_status !== 'in_stock'}
-                className={`text-sm py-2 px-4 rounded-full font-semibold transition-all ${
-                  added
-                    ? 'bg-green-600 text-white'
-                    : adding
-                    ? 'bg-amber-400 text-white'
-                    : 'btn-primary'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {added ? '✓ Added!' : adding ? '...' : 'Add to Cart'}
-              </button>
             </div>
           </div>
         </div>
@@ -147,26 +134,13 @@ export default function ProductCard({ product, view = 'grid' }) {
 
         <div className="mt-auto">
           <PriceTag product={product} size="md" />
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3">
             <Link
               to={`/product/${product.id}`}
-              className="btn-outline text-sm py-2 px-3 flex-1 text-center"
+              className="btn-primary block w-full text-center text-sm py-2.5"
             >
-              Details
+              Buy
             </Link>
-            <button
-              onClick={handleAddToCart}
-              disabled={product.stock_status !== 'in_stock'}
-              className={`flex-1 text-sm py-2 px-3 rounded-full font-semibold transition-all duration-300 ${
-                added
-                  ? 'bg-green-600 text-white'
-                  : adding
-                  ? 'bg-amber-400 text-white'
-                  : 'btn-primary'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {added ? '✓ Added!' : adding ? '...' : '+ Cart'}
-            </button>
           </div>
         </div>
       </div>

@@ -18,6 +18,9 @@ export default function Admin() {
     name: '', size: '', description: '', mrp: '', offer_price: '', special_price: '',
     is_offer_active: false, stock_status: 'in_stock', images: ''
   })
+  const [productFiles, setProductFiles] = useState([])
+  const [heroFile, setHeroFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -52,25 +55,53 @@ export default function Admin() {
 
   const handleProductSubmit = async (e) => {
     e.preventDefault()
-    const payload = {
-      ...productForm,
-      mrp: Number(productForm.mrp),
-      offer_price: productForm.offer_price ? Number(productForm.offer_price) : null,
-      special_price: productForm.special_price ? Number(productForm.special_price) : null,
-      images: productForm.images ? productForm.images.split(',').map(s => s.trim()) : []
-    }
-
+    setUploading(true)
     try {
+      let finalImages = productForm.images ? productForm.images.split(',').map(s => s.trim()).filter(Boolean) : []
+      
+      if (productFiles.length > 0) {
+        const uploadedUrls = []
+        for (const file of productFiles) {
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+          const filePath = `products/${fileName}`
+          
+          const { error: uploadError } = await supabase.storage
+            .from('product-images')
+            .upload(filePath, file)
+            
+          if (uploadError) throw uploadError
+          
+          const { data } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(filePath)
+            
+          uploadedUrls.push(data.publicUrl)
+        }
+        finalImages = uploadedUrls // Replace existing images if new ones are uploaded
+      }
+
+      const payload = {
+        ...productForm,
+        mrp: Number(productForm.mrp),
+        offer_price: productForm.offer_price ? Number(productForm.offer_price) : null,
+        special_price: productForm.special_price ? Number(productForm.special_price) : null,
+        images: finalImages
+      }
+
       if (editingProduct) {
         await supabase.from('products').update(payload).eq('id', editingProduct.id)
       } else {
         await supabase.from('products').insert([payload])
       }
       setEditingProduct(null)
+      setProductFiles([])
       fetchData()
     } catch (err) {
       console.error(err)
-      alert('Error saving product')
+      alert('Error saving product: ' + err.message)
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -80,6 +111,26 @@ export default function Admin() {
       ...p,
       images: p.images ? p.images.join(', ') : ''
     })
+    setProductFiles([])
+  }
+
+  const handleHeroUpload = async () => {
+    if (!heroFile) return
+    setUploading(true)
+    try {
+      const { error } = await supabase.storage
+        .from('product-images')
+        .upload('hero-bg.jpg', heroFile, { upsert: true, cacheControl: '0' })
+        
+      if (error) throw error
+      alert('Hero image updated successfully! Refresh the home page to see changes.')
+      setHeroFile(null)
+    } catch (err) {
+      console.error(err)
+      alert('Error uploading hero image: ' + err.message)
+    } finally {
+      setUploading(false)
+    }
   }
 
   const deleteProduct = async (id) => {
@@ -130,6 +181,7 @@ export default function Admin() {
         <div className="flex gap-2 mb-6">
           <button onClick={() => setActiveTab('products')} className={`px-6 py-2.5 rounded-full font-medium transition-all ${activeTab === 'products' ? 'bg-forest text-white shadow-md' : 'bg-white text-gray-600 hover:bg-green-50'}`}>Products</button>
           <button onClick={() => setActiveTab('orders')} className={`px-6 py-2.5 rounded-full font-medium transition-all ${activeTab === 'orders' ? 'bg-forest text-white shadow-md' : 'bg-white text-gray-600 hover:bg-green-50'}`}>Orders</button>
+          <button onClick={() => setActiveTab('settings')} className={`px-6 py-2.5 rounded-full font-medium transition-all ${activeTab === 'settings' ? 'bg-forest text-white shadow-md' : 'bg-white text-gray-600 hover:bg-green-50'}`}>Settings</button>
         </div>
 
         {loading ? (
@@ -143,7 +195,7 @@ export default function Admin() {
                     <div key={p.id} className="card p-4 flex flex-wrap gap-4 items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                          {p.images?.[0] && <img src={p.images[0]} className="w-full h-full object-cover" alt="" />}
+                          {p.images?.[0] && <img src={p.images[0]} className="w-full h-full object-cover aspect-square" alt="" />}
                         </div>
                         <div>
                           <h3 className="font-semibold text-forest">{p.name} <span className="text-xs text-amber-600 ml-2">{p.size}</span></h3>
@@ -201,13 +253,16 @@ export default function Admin() {
                         <textarea value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} className="w-full p-2.5 border rounded-lg h-24 resize-none" required />
                       </div>
                       <div>
-                        <label className="block mb-1 font-semibold text-gray-700">Image URLs (comma separated)</label>
-                        <textarea value={productForm.images} onChange={e => setProductForm({...productForm, images: e.target.value})} className="w-full p-2.5 border rounded-lg h-24 resize-none" placeholder="https://...1.jpg, https://...2.jpg" />
+                        <label className="block mb-1 font-semibold text-gray-700">Product Images</label>
+                        <input type="file" multiple accept="image/*" onChange={e => setProductFiles(Array.from(e.target.files))} className="w-full p-2 border rounded-lg bg-white" />
+                        {editingProduct && productForm.images && productFiles.length === 0 && (
+                          <p className="text-xs text-gray-500 mt-1">Currently has {productForm.images.split(',').filter(Boolean).length} image(s). Uploading new ones will replace them.</p>
+                        )}
                       </div>
                       <div className="flex gap-2">
-                        <button type="submit" className="flex-1 btn-primary py-2.5">Save Product</button>
+                        <button type="submit" disabled={uploading} className="flex-1 btn-primary py-2.5 disabled:opacity-50">{uploading ? 'Saving...' : 'Save Product'}</button>
                         {editingProduct && (
-                          <button type="button" onClick={() => { setEditingProduct(null); setProductForm({ name: '', size: '', description: '', mrp: '', offer_price: '', special_price: '', is_offer_active: false, stock_status: 'in_stock', images: '' }) }} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full font-semibold hover:bg-gray-300 transition-colors">Cancel</button>
+                          <button type="button" onClick={() => { setEditingProduct(null); setProductFiles([]); setProductForm({ name: '', size: '', description: '', mrp: '', offer_price: '', special_price: '', is_offer_active: false, stock_status: 'in_stock', images: '' }) }} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full font-semibold hover:bg-gray-300 transition-colors">Cancel</button>
                         )}
                       </div>
                     </form>
@@ -265,6 +320,37 @@ export default function Admin() {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {activeTab === 'settings' && (
+              <div className="lg:col-span-3">
+                <div className="card p-6 max-w-2xl">
+                  <h2 className="font-display text-2xl font-bold text-forest mb-6">Website Settings</h2>
+                  
+                  <div className="space-y-6">
+                    <div className="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                      <h3 className="font-bold text-lg text-gray-800 mb-2">Hero Background Image</h3>
+                      <p className="text-sm text-gray-600 mb-4">Upload a high-quality image for the top banner of the home page. This will replace the existing background.</p>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={e => setHeroFile(e.target.files[0])} 
+                          className="w-full sm:w-auto p-2 border rounded-lg bg-white flex-1" 
+                        />
+                        <button 
+                          onClick={handleHeroUpload} 
+                          disabled={!heroFile || uploading}
+                          className="btn-primary py-2 px-6 whitespace-nowrap disabled:opacity-50"
+                        >
+                          {uploading ? 'Uploading...' : 'Update Background'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

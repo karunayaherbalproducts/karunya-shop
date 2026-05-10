@@ -50,7 +50,7 @@ const WHY_CHOOSE = [
   { icon: '🌱', title: 'Sustainably Sourced', desc: 'Ingredients ethically sourced from trusted organic growers in Tamil Nadu and beyond.' },
 ]
 
-const HERO_IMAGE = 'https://sqxqwmbqxpopfntfgfqz.supabase.co/storage/v1/object/public/product-images/hero/1777707106069.png'
+const HERO_IMAGE = `${import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'}/storage/v1/object/public/product-images/hero-bg.jpg`
 
 export default function Home() {
   const [products, setProducts] = useState([])
@@ -79,26 +79,21 @@ export default function Home() {
     }
   }
 
-  // Fallback demo products if Supabase not configured
-  const demoProducts = [
-    { id: 'demo-100', name: 'Karunya Herbal Hair Oil', size: '100ml', description: '100% natural Ayurvedic hair oil with 17 powerful herbs.', mrp: 399, offer_price: 299, special_price: 249, is_offer_active: true, stock_status: 'in_stock', images: [] },
-    { id: 'demo-500', name: 'Karunya Herbal Hair Oil', size: '500ml', description: '100% natural Ayurvedic hair oil with 17 powerful herbs.', mrp: 799, offer_price: 599, special_price: 499, is_offer_active: true, stock_status: 'in_stock', images: [] },
-    { id: 'demo-1000', name: 'Karunya Herbal Hair Oil', size: '1000ml', description: '100% natural Ayurvedic hair oil with 17 powerful herbs.', mrp: 1499, offer_price: 999, special_price: null, is_offer_active: true, stock_status: 'in_stock', images: [] },
-  ]
+  // Products are now fetched exclusively from Supabase
 
-  const displayProducts = products.length > 0 ? products : demoProducts
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section ref={heroRef} className="relative h-screen min-h-[600px] flex items-center overflow-hidden">
-        <motion.div className="absolute inset-0 z-0" style={{ y: heroY }}>
-          {HERO_IMAGE ? (
-            <img src={HERO_IMAGE} alt="Karunya Herbal Hair Oil" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-green-900 via-green-800 to-green-700" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-transparent" />
+        <motion.div className="absolute inset-0 z-0 bg-gradient-to-br from-green-900 via-green-800 to-green-700" style={{ y: heroY }}>
+          <img 
+            src={HERO_IMAGE} 
+            alt="Karunya Herbal Hair Oil" 
+            className="w-full h-full object-cover relative z-10 transition-opacity duration-500" 
+            onError={(e) => { e.target.style.opacity = 0 }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-transparent z-20" />
         </motion.div>
         <motion.div className="relative z-10 container-max px-6 pt-20" style={{ opacity: heroOpacity }}>
           <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
@@ -171,13 +166,18 @@ export default function Home() {
                 <div key={i} className="card h-80 animate-pulse bg-gray-100" />
               ))}
             </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-20 text-gray-500 bg-white rounded-2xl border border-dashed border-gray-200">
+              <p className="text-xl mb-2">No products found</p>
+              <p className="text-sm">Products added in the admin panel will appear here.</p>
+            </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {displayProducts.map(p => <ProductCard key={p.id} product={p} view="grid" />)}
+              {products.map(p => <ProductCard key={p.id} product={p} view="grid" />)}
             </div>
           ) : (
             <div className="space-y-4">
-              {displayProducts.map(p => <ProductCard key={p.id} product={p} view="list" />)}
+              {products.map(p => <ProductCard key={p.id} product={p} view="list" />)}
             </div>
           )}
         </div>

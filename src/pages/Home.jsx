@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import ProductCard from '../components/ProductCard'
@@ -33,13 +33,7 @@ const PROCESS_STEPS = [
   { step: '06', title: 'Filtering & Bottling', desc: 'Fine muslin cloth filtering produces a rich, aromatic, golden herbal oil — free from residues but full of natural goodness. Stored in sterile, airtight containers.', icon: '✨' },
 ]
 
-const TESTIMONIALS = [
-  { name: 'Sangeetha M.', location: 'Coimbatore', rating: 5, text: 'I love that it\'s completely chemical-free. My dandruff has reduced drastically and my scalp feels fresh. My mom and sister use it now too!' },
-  { name: 'Divya P.', location: 'Bangalore', rating: 5, text: 'After trying so many products, I finally found one that works. My hair is no longer dry and frizzy. Thank you, Karunya!' },
-  { name: 'Meenakshi K.', location: 'Madurai', rating: 5, text: 'This oil has become a weekend ritual. The 17 natural ingredients truly make a difference — my hair feels nourished and the shine is back.' },
-  { name: 'Priya R.', location: 'Chennai', rating: 5, text: 'Been using for 3 months and my hair fall has reduced significantly. The fragrance is amazing and completely natural!' },
-  { name: 'Lakshmi S.', location: 'Salem', rating: 5, text: 'Authentic Ayurvedic quality. You can feel the difference in just 2 weeks. My hair is thicker and stronger than ever.' },
-]
+
 
 const WHY_CHOOSE = [
   { icon: '🌿', title: '100% Natural & Handmade', desc: 'Every drop crafted by hand using traditional methods passed down through generations.' },
@@ -50,13 +44,14 @@ const WHY_CHOOSE = [
   { icon: '🌱', title: 'Sustainably Sourced', desc: 'Ingredients ethically sourced from trusted organic growers in Tamil Nadu and beyond.' },
 ]
 
-const HERO_IMAGE = `${import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'}/storage/v1/object/public/product-images/hero-bg.jpg`
+const HERO_IMAGE = '/hero-img-1.jpg'
 
 export default function Home() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState('grid')
   const heroRef = useRef(null)
+  const location = useLocation()
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
@@ -64,6 +59,15 @@ export default function Home() {
   useEffect(() => {
     fetchProducts()
   }, [])
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '')
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [location.hash])
 
   async function fetchProducts() {
     try {
@@ -184,20 +188,32 @@ export default function Home() {
       {/* Why Choose Us */}
       <section id="why" className="section-padding" style={{ background: 'linear-gradient(135deg, #0F2B1F 0%, #1B4332 100%)' }}>
         <div className="container-max">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <span className="bg-amber-500/20 text-amber-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-4 inline-block tracking-widest uppercase">Why Choose Us</span>
-            <h2 className="font-display text-4xl font-bold text-white mt-3">The Karunya Difference</h2>
-            <p className="mt-4 text-green-300 max-w-xl mx-auto">At Karunya Herbal Hair Oil, we follow time-honored methods to craft a truly nourishing hair oil using ancient Ayurvedic wisdom.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {WHY_CHOOSE.map((item, i) => (
-              <motion.div key={item.title} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="glass rounded-2xl p-6 hover:bg-white/20 transition-all">
-                <div className="text-4xl mb-4">{item.icon}</div>
-                <h3 className="font-display text-lg font-semibold text-amber-400 mb-2">{item.title}</h3>
-                <p className="text-green-200 text-sm leading-relaxed">{item.desc}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-10">
+                <span className="bg-amber-500/20 text-amber-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-4 inline-block tracking-widest uppercase">Why Choose Us</span>
+                <h2 className="font-display text-4xl font-bold text-white mt-3">The Karunya Difference</h2>
+                <p className="mt-4 text-green-300 max-w-xl">At Karunya Herbal Hair Oil, we follow time-honored methods to craft a truly nourishing hair oil using ancient Ayurvedic wisdom.</p>
               </motion.div>
-            ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {WHY_CHOOSE.map((item, i) => (
+                  <motion.div key={item.title} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                    className="glass rounded-2xl p-5 hover:bg-white/20 transition-all">
+                    <div className="text-3xl mb-3">{item.icon}</div>
+                    <h3 className="font-display text-base font-semibold text-amber-400 mb-1.5">{item.title}</h3>
+                    <p className="text-green-200 text-xs leading-relaxed">{item.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              whileInView={{ opacity: 1, scale: 1 }} 
+              viewport={{ once: true }}
+              className="rounded-3xl overflow-hidden shadow-2xl"
+            >
+              <img src="/hero-img-2.jpg" alt="Karunya Difference" className="w-full h-auto object-cover" />
+            </motion.div>
           </div>
         </div>
       </section>
@@ -233,16 +249,26 @@ export default function Home() {
             <h2 className="section-title mt-3">🍃 Our Preparation Process</h2>
             <p className="mt-4 text-gray-600 max-w-xl mx-auto">We follow a multi-step, natural infusion process to ensure every drop of oil captures the essence of these healing herbs.</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PROCESS_STEPS.map((step, i) => (
-              <motion.div key={step.step} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="card p-6 relative overflow-hidden">
-                <div className="absolute top-4 right-4 font-display text-5xl font-bold text-green-100">{step.step}</div>
-                <div className="text-4xl mb-4">{step.icon}</div>
-                <h3 className="font-display text-lg font-semibold text-forest mb-2">{step.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }} 
+              whileInView={{ opacity: 1, x: 0 }} 
+              viewport={{ once: true }}
+              className="lg:col-span-1 lg:sticky lg:top-28 rounded-3xl overflow-hidden shadow-2xl"
+            >
+              <img src="/process-img-1.jpg" alt="Traditional Preparation Process" className="w-full h-auto object-cover" />
+            </motion.div>
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {PROCESS_STEPS.map((step, i) => (
+                <motion.div key={step.step} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  className="card p-6 relative overflow-hidden">
+                  <div className="absolute top-4 right-4 font-display text-5xl font-bold text-green-100">{step.step}</div>
+                  <div className="text-4xl mb-4">{step.icon}</div>
+                  <h3 className="font-display text-lg font-semibold text-forest mb-2">{step.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -255,55 +281,38 @@ export default function Home() {
             <h2 className="font-display text-4xl font-bold text-white mt-3">🍃 How to Use</h2>
             <p className="mt-4 text-green-300 max-w-xl mx-auto">Follow these simple steps to get maximum benefits from Karunya Herbal Hair Oil.</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {[
-              { step: '1', title: 'Apply to Scalp & Roots', desc: 'Part your hair into sections. Apply oil directly to scalp. Massage gently in circular motions for 5–10 minutes to boost circulation and stimulate hair follicles.' },
-              { step: '2', title: 'Spread to Hair Length', desc: 'After massaging the scalp, apply the remaining oil along the length of your hair. Focus on the ends, especially if you have dry or damaged tips.' },
-              { step: '3', title: 'Let It Soak In', desc: 'Leave the oil on for at least 1 hour. For deeper treatment, wrap hair with a towel or shower cap and leave overnight.' },
-              { step: '4', title: 'Wash with Mild Shampoo', desc: 'Use a gentle, sulfate-free herbal shampoo to wash off. You may need two rinses. Avoid harsh chemical shampoos.' },
-            ].map((item, i) => (
-              <motion.div key={item.step} initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-                className="glass rounded-2xl p-6 flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-amber-500 text-white font-bold text-lg flex items-center justify-center shrink-0">
-                  {item.step}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-amber-400 mb-1">✅ {item.title}</h3>
-                  <p className="text-green-200 text-sm leading-relaxed">{item.desc}</p>
-                </div>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center max-w-6xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }} 
+              whileInView={{ opacity: 1, x: 0 }} 
+              viewport={{ once: true }}
+              className="rounded-3xl overflow-hidden shadow-2xl relative"
+            >
+              <img src="/hero-img-3.jpg" alt="How to Use Karunya Herbal Hair Oil" className="w-full h-auto object-cover" />
+            </motion.div>
+            <div className="space-y-4">
+              {[
+                { step: '1', title: 'Apply to Scalp & Roots', desc: 'Part your hair into sections. Apply oil directly to scalp. Massage gently in circular motions for 5–10 minutes to boost circulation and stimulate hair follicles.' },
+                { step: '2', title: 'Spread to Hair Length', desc: 'After massaging the scalp, apply the remaining oil along the length of your hair. Focus on the ends, especially if you have dry or damaged tips.' },
+                { step: '3', title: 'Let It Soak In', desc: 'Leave the oil on for at least 1 hour. For deeper treatment, wrap hair with a towel or shower cap and leave overnight.' },
+                { step: '4', title: 'Wash with Mild Shampoo', desc: 'Use a gentle, sulfate-free herbal shampoo to wash off. You may need two rinses. Avoid harsh chemical shampoos.' },
+              ].map((item, i) => (
+                <motion.div key={item.step} initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  className="glass rounded-2xl p-6 flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-amber-500 text-white font-bold text-lg flex items-center justify-center shrink-0">
+                    {item.step}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-amber-400 mb-1">✅ {item.title}</h3>
+                    <p className="text-green-200 text-sm leading-relaxed">{item.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimonials" className="section-padding bg-gradient-to-b from-cream to-amber-50">
-        <div className="container-max">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <span className="badge-natural mb-4 inline-block">Customer Love</span>
-            <h2 className="section-title mt-3">What Our Customers Say</h2>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <motion.div key={t.name} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="card p-6">
-                <div className="flex text-amber-400 text-xl mb-3">{'★'.repeat(t.rating)}</div>
-                <p className="text-gray-600 text-sm leading-relaxed italic mb-4">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center text-white font-bold">
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-forest text-sm">{t.name}</p>
-                    <p className="text-gray-400 text-xs">{t.location}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Banner */}
       <section className="section-padding bg-gradient-to-r from-amber-600 to-amber-500">

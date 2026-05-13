@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 const socialLinks = [
@@ -12,10 +12,26 @@ const quickLinks = [
   { label: 'Products', to: '/#products' },
   { label: 'Ingredients', to: '/#ingredients' },
   { label: 'Process', to: '/#process' },
-  { label: 'Testimonials', to: '/#testimonials' },
 ]
 
 export default function Footer() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const handleNavClick = (e, to) => {
+    e.preventDefault()
+    if (to.startsWith('/#')) {
+      const id = to.replace('/#', '')
+      if (location.pathname === '/' && location.hash === `#${id}`) {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+      } else {
+        navigate(to)
+      }
+    } else {
+      navigate(to)
+    }
+  }
+
   return (
     <footer
       className="relative overflow-hidden"
@@ -29,18 +45,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-                  <path d="M20 5C20 5 10 14 10 22C10 29 14 35 20 35C26 35 30 29 30 22C30 14 20 5 20 5Z" fill="#1B4332"/>
-                  <path d="M20 12C20 12 14 18 14 23C14 27 17 31 20 31C23 31 26 27 26 23C26 18 20 12 20 12Z" fill="#C9A84C"/>
-                  <circle cx="20" cy="23" r="3" fill="#1B4332"/>
-                </svg>
-              </div>
-              <div>
-                <div className="font-display text-xl font-bold text-white">KARUNYA</div>
-                <div className="text-xs text-amber-400 tracking-widest">HERBAL HAIR OIL</div>
-              </div>
+            <div className="mb-4">
+              <img 
+                src="/logo-new.png" 
+                alt="Karunya Herbal Hair Oil" 
+                className="h-14 sm:h-16 object-contain"
+                style={{ filter: 'brightness(0) invert(1)' }}
+              />
             </div>
             <p className="text-green-200 text-sm leading-relaxed mb-5 max-w-xs">
               Crafted with love and ancient Ayurvedic wisdom in Tamil Nadu. 
@@ -76,12 +87,13 @@ export default function Footer() {
             <ul className="space-y-2">
               {quickLinks.map(link => (
                 <li key={link.label}>
-                  <Link
-                    to={link.to}
-                    className="text-green-200 hover:text-amber-400 transition-colors text-sm flex items-center gap-2"
+                  <a
+                    href={link.to}
+                    onClick={(e) => handleNavClick(e, link.to)}
+                    className="text-green-200 hover:text-amber-400 transition-colors text-sm flex items-center gap-2 cursor-pointer"
                   >
                     <span className="text-amber-600">→</span> {link.label}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>

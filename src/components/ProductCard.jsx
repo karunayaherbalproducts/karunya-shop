@@ -11,9 +11,9 @@ export default function ProductCard({ product, view = 'grid' }) {
   const navigate = useNavigate()
 
   const mainImage = product.images?.[0]
-  const activePrice = product.is_offer_active
-    ? (product.special_price || product.offer_price || product.mrp)
-    : product.mrp
+  const activePrice = (product.is_offer_active && product.special_price)
+    ? product.special_price
+    : (product.offer_price || product.mrp)
 
   const handleAddToCart = (e) => {
     e.preventDefault()

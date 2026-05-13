@@ -117,7 +117,7 @@ export default function ProductDetail() {
     )
   }
 
-  const TABS = ['description', 'ingredients', 'how-to-use', 'reviews']
+  const TABS = ['description', 'ingredients', 'how-to-use']
 
   return (
     <div className="min-h-screen pt-20 bg-cream">
@@ -273,27 +273,7 @@ export default function ProductDetail() {
                 ))}
               </div>
             )}
-            {activeTab === 'reviews' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {[
-                  { name: 'Sangeetha M.', location: 'Coimbatore', rating: 5, text: 'I love that it\'s completely chemical-free. My dandruff has reduced drastically and my scalp feels fresh!' },
-                  { name: 'Divya P.', location: 'Bangalore', rating: 5, text: 'After trying so many products, I finally found one that works. My hair is no longer dry and frizzy.' },
-                  { name: 'Meenakshi K.', location: 'Madurai', rating: 5, text: 'This oil has become a weekend ritual. The 17 natural ingredients truly make a difference.' },
-                ].map(r => (
-                  <div key={r.name} className="card p-5">
-                    <div className="text-amber-400 text-lg mb-2">{'★'.repeat(r.rating)}</div>
-                    <p className="text-gray-600 text-sm italic mb-3">"{r.text}"</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-green-700 text-white text-sm flex items-center justify-center font-bold">{r.name[0]}</div>
-                      <div>
-                        <p className="text-sm font-semibold text-forest">{r.name}</p>
-                        <p className="text-xs text-gray-400">{r.location}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+
           </motion.div>
         </div>
       </div>

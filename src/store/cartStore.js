@@ -44,9 +44,9 @@ export const useCartStore = create(
 
       getTotalPrice: () =>
         get().items.reduce((sum, item) => {
-          const price = item.is_offer_active
-            ? (item.special_price || item.offer_price || item.mrp)
-            : item.mrp
+          const price = (item.is_offer_active && item.special_price)
+            ? item.special_price
+            : (item.offer_price || item.mrp)
           return sum + price * item.quantity
         }, 0),
 

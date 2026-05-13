@@ -28,20 +28,16 @@ export default function Navbar() {
     { label: 'Products', to: '/#products' },
     { label: 'Ingredients', to: '/#ingredients' },
     { label: 'Process', to: '/#process' },
-    { label: 'Testimonials', to: '/#testimonials' },
     { label: 'Contact', to: '/#contact' },
   ]
 
   const handleNavClick = (to) => {
     if (to.startsWith('/#')) {
       const id = to.replace('/#', '')
-      if (location.pathname !== '/') {
-        navigate('/')
-        setTimeout(() => {
-          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-        }, 100)
-      } else {
+      if (location.pathname === '/' && location.hash === `#${id}`) {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+      } else {
+        navigate(to)
       }
     } else {
       navigate(to)
@@ -64,22 +60,15 @@ export default function Navbar() {
         <div className="container-max px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-800 to-green-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                <svg viewBox="0 0 40 40" className="w-6 h-6" fill="none">
-                  <path d="M20 5C20 5 10 14 10 22C10 29 14 35 20 35C26 35 30 29 30 22C30 14 20 5 20 5Z" fill="#C9A84C"/>
-                  <path d="M20 12C20 12 14 18 14 23C14 27 17 31 20 31C23 31 26 27 26 23C26 18 20 12 20 12Z" fill="#1B4332"/>
-                  <circle cx="20" cy="23" r="3" fill="#C9A84C"/>
-                </svg>
-              </div>
-              <div>
-                <div className={`font-display text-lg font-bold leading-none transition-colors ${
-                  scrolled || !isHome ? 'text-forest' : 'text-white'
-                }`}>KARUNYA</div>
-                <div className={`text-xs font-body tracking-widest leading-none transition-colors ${
-                  scrolled || !isHome ? 'text-gold' : 'text-yellow-200'
-                }`}>HERBAL HAIR OIL</div>
-              </div>
+            <Link to="/" className="flex items-center group">
+              <img 
+                src="/logo-new.png" 
+                alt="Karunya Herbal Hair Oil" 
+                className="h-12 sm:h-14 object-contain group-hover:scale-105 transition-transform"
+                style={{ 
+                  filter: scrolled || !isHome ? 'none' : 'brightness(0) invert(1)' 
+                }}
+              />
             </Link>
 
             {/* Desktop Nav */}

@@ -1,11 +1,11 @@
 export default function PriceTag({ product, size = 'md' }) {
   const { mrp, offer_price, special_price, is_offer_active } = product
 
-  const activePrice = is_offer_active
-    ? (special_price || offer_price || mrp)
-    : mrp
+  const activePrice = (is_offer_active && special_price) 
+    ? special_price 
+    : (offer_price || mrp)
 
-  const showOffer = is_offer_active && (offer_price || special_price)
+  const showOffer = activePrice < mrp
   const savings = mrp - activePrice
 
   const sizeClasses = {
